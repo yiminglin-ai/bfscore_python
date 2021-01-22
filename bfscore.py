@@ -162,36 +162,3 @@ def bfscore(gtfile, prfile, threshold=2):
 
     # return bfscores[1:], np.sum(bfscores[1:])/len(classes[1:])    # Return bfscores, except for background, and per image score
     return bfscores[1:], areas_gt[1:]    # Return bfscores, except for background
-
-
-if __name__ == "__main__":
-
-    sample_gt = 'data/gt_1.png'
-    # sample_gt = 'data/gt_0.png'
-
-    sample_pred = 'data/crf_1.png'
-    # sample_pred = 'data/pred_0.png'
-
-    score, areas_gt = bfscore(sample_gt, sample_pred, 2)    # Same classes
-    # score, areas_gt = bfscore(sample_gt, sample_pred, 2)    # Different classes
-
-    # gt_shape = cv2.imread('data/gt_1.png').shape
-    # print("Total area:", gt_shape[0] * gt_shape[1])
-
-    total_area = np.nansum(areas_gt)
-    print("GT area (except background):", total_area)
-    fw_bfscore = []
-    for each in zip(score, areas_gt):
-        if math.isnan(each[0]) or math.isnan(each[1]):
-            fw_bfscore.append(math.nan)
-        else:
-            fw_bfscore.append(each[0] * each[1])
-    print(fw_bfscore)
-
-    print("\n>>>>BFscore:\n")
-    print("BFSCORE:", score)
-    print("Per image BFscore:", np.nanmean(score))
-
-    print("\n>>>>Weighted BFscore:\n")
-    print("Weighted-BFSCORE:", fw_bfscore)
-    print("Per image Weighted-BFscore:", np.nansum(fw_bfscore)/total_area)

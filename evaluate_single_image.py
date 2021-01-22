@@ -73,13 +73,14 @@ def show_result(hist, n_cl=18):
 
 if __name__ == "__main__":
 
-    label_path = "gt_0.png"
-    pred_path = "pred_0.png"
+    label_path = "./data/gt_1.png"
+    pred_path = "./data/crf_1.png"
+    # pred_path = "./data/gt_1.png"
     n_classes = 18
 
     # miou
     val_hist = compute_hist(pred_path, label_path, n_classes)
-    show_result(val_hist, n_classes)
+    # show_result(val_hist, n_classes)
 
     print('\n')
 
@@ -98,8 +99,28 @@ if __name__ == "__main__":
             fw_bfscore.append(math.nan)
         else:
             fw_bfscore.append(each[0] * each[1])
-    # print(fw_bfscore)
-
+    print(fw_bfscore)
     print("\n>>>>Weighted BFscore:\n")
     print("Weighted-BFSCORE:", fw_bfscore)
     print("Per image Weighted-BFscore:", np.nansum(fw_bfscore)/total_area)
+
+
+
+    # f_boundary
+    print("\n >>>> Contour Accuracy:\n")
+    from f_boundary import db_eval_boundary
+    gt = cv2.imread(label_path, cv2.IMREAD_GRAYSCALE)
+    pred = cv2.imread(pred_path, cv2.IMREAD_GRAYSCALE)
+    f_scores_for_this_image =[] 
+    for c in range(n_classes):
+        if not np.any(gt==c): f_scores_for_this_image.append(np.nan)
+        pred_bmap = np.zeros_like(pred)
+        gt_bmap = np.zeros_like(gt)
+        pred_bmap[pred==c] = 1
+        gt_bmap[gt==c] = 1
+        f_score_for_c = db_eval_boundary(pred_bmap, gt_bmap)
+        f_scores_for_this_image.append(f_score_for_c)
+    
+    f_score_for_this_image = np.nanmean(f_scores_for_this_image)
+    print("Contour Accuracy: ", f_scores_for_this_image)
+    print("Per image Contour Accuracy:", f_score_for_this_image)
